@@ -33,7 +33,7 @@ public class scan {
 	private String park1 = "http://www.cool18.com/bbs4/index.php?app=forum&act=gold&p=1";
 	private String park2= "http://www.cool18.com/bbs4/classbk/md1.shtml";
 	
-	static public int currentcount =0;
+	static public int currentcount =1;
 	static public String currentcharset ="";
 	
 	public static void main(String[] args) throws IOException {
@@ -47,7 +47,7 @@ public class scan {
 		   //http://www.cool18.com/bbs4/index.php?app=forum&act=threadview&tid=13950945
 		   
 		//for for first one 
-		   for(int i = 13950945;i< 13950947;i++){
+		   for(int i = 0;i< 1395094700;i++){
 			   scan1(i);
 		   }
 	}
@@ -60,9 +60,15 @@ public class scan {
     	huc.setRequestMethod("HEAD");
     	if(huc.getResponseCode()== 200){
     		String temp = sethtml(init);
-    		System.out.println(new String(temp.substring(680, 800).getBytes("GBK"),"EUC_CN")); 
-    		if(temp.contains("bodybegin")){
-    			C_Page(temp,currentcount +1);
+    		//System.out.println(new String(temp.substring(680, 800).getBytes("GBK"),"EUC_CN")); 
+    		if(temp == null) return null; 
+    		int beginindex2 = temp.indexOf("<!--bodybegin-->");
+    		int endindex2 = temp.indexOf("<!--bodyend-->");
+    		if(beginindex2 == -1 || endindex2 <=0) return null;
+    		String temp2= temp.substring(beginindex2+17, endindex2);
+    		
+    		if(temp.contains("bodybegin")&& temp2.length()>=50 && temp2.contains("http://www.cool18.com/bbs4/index.php?app=forum&act=threadview&tid=")!=true ){
+    			C_Page(temp,currentcount );
     		}
     		return null;
     	}
@@ -103,8 +109,14 @@ public class scan {
 		int endindex2 = input.indexOf("<!--bodyend-->")+14;
 		String s2=input.substring(beginindex2, endindex2);
 		String tmp2=s2.replaceAll("6park", "9fun9");
-		
-		String finalstring= start +  headstart+  charset2 +titlestart+tmp1+ titleend+headend+ bodystart+tmp2 +script+bodyend+ end;
+		String previouspage="   <a href=\"http://www.9fun9.com/y/"+ Integer.toString(currentcount-1)+".html\"> 上一页 </a>       <a href=\"http://www.9fun9.com/\"> 主页 </a>       <a href=\"http://www.9fun9.com/y/"+ Integer.toString(currentcount +1)+".html\"> 下一页 </a>      ";
+		String previouspage1="       <a href=\"http://www.9fun9.com/\"> 主页 </a>       <a href=\"http://www.9fun9.com/y/"+ Integer.toString(currentcount +1)+".html\"> 下一页 </a>      ";
+		 
+		String page= "";
+		if(currentcount <=1) page= previouspage1 ;
+		else page=previouspage ;
+ 
+		String finalstring= start +  headstart+  charset2 +titlestart+tmp1+ titleend+headend+ bodystart+"<br>"+page+"<br>"+tmp2+"<br>"+page +script+bodyend+ end;
 		String workingDir = System.getProperty("user.dir");
 		File newHtmlFile = new File(workingDir+"/test/"+count+".html");
 		FileUtils.writeStringToFile(newHtmlFile, finalstring, currentcharset);//.writeStringToFile(newHtmlFile, finalstring);
